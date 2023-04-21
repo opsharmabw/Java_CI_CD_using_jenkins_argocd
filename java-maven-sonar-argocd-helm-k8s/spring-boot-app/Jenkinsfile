@@ -1,0 +1,46 @@
+/* groovylint-disable GStringExpressionWithinString, LineLength, NestedBlockDepth, VariableName */
+/* groovylint-disable-next-line CompileStatic, NoDef, UnusedVariable, VariableTypeRequired */
+@Library('shared_library_jenkins')_
+/* groovylint-disable-next-line VariableName */
+pipeline {
+    agent {
+        kubernetes {
+            yaml libraryResource('build_node.yaml')
+        }
+    }
+    stages {
+        stage('Git checkout')
+        {
+            steps
+            {
+                script
+                {
+                    try {
+                        checkout([$class: 'GitSCM', branches: [[name: "dev"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'github-user', url: 'https://github.com/opsharmabw/Java_CI_CD_using_jenkins_argocd.git']]])
+                        sh """#!/bin/bash
+                            git checkout dev
+                        """
+                    }
+                    catch (exc)
+                    {
+                        echo 'Git checkout failed'
+                        throw exc
+                    }
+                }
+            }
+        }
+        stage('Create Docker image') {
+            steps {
+                container('docker') {
+                    withCredentials([usernamePassword(credentialsId: 'docker_cred', passwordVariable: 'PASSWORD', usernameVariable: 'USER')]) {
+                        sh """
+                            docker login "${REPO_URL}" -u "${USER}" -p "${PASSWORD}"
+                            docker build . -f Dockerfile -t "${REPO_URL}/centralsvc:${params.svc_version}-${BUILD_TIMESTAMP}"
+                            docker push "${REPO_URL}/centralsvc:${params.svc_version}-${BUILD_TIMESTAMP}"
+                         """
+                }
+              }
+            }
+        }
+    }
+}
