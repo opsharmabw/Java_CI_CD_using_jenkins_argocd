@@ -16,9 +16,9 @@ pipeline {
                 script
                 {
                     try {
-                        checkout([$class: 'GitSCM', branches: [[name: "dev"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'github-user', url: 'https://github.com/opsharmabw/Java_CI_CD_using_jenkins_argocd.git']]])
+                        checkout([$class: 'GitSCM', branches: [[name: "${GIT_BRANCH}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'opsharmabwgiturl', url: 'https://github.com/opsharmabw/Java_CI_CD_using_jenkins_argocd.git']]])
                         sh """#!/bin/bash
-                            git checkout dev
+                            git checkout ${GIT_BRANCH}
                         """
                     }
                     catch (exc)
