@@ -1,0 +1,53 @@
+/* groovylint-disable GStringExpressionWithinString, LineLength, NestedBlockDepth, VariableName */
+/* groovylint-disable-next-line CompileStatic, NoDef, UnusedVariable, VariableTypeRequired */
+@Library('shared_library_jenkins')_
+/* groovylint-disable-next-line VariableName */
+pipeline {
+    agent {
+        kubernetes {
+            yaml libraryResource('git_node.yaml')
+        }
+    }
+    stages {
+        stage('Git checkout')
+        {
+            steps
+            {
+                script
+                {
+                    try {
+                        checkout([$class: 'GitSCM', branches: [[name: "${GIT_BRANCH}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'opsharmabwgiturl', url: 'https://github.com/opsharmabw/Java_CI_CD_using_jenkins_argocd.git']]])
+                        sh """#!/bin/bash
+                            git checkout ${GIT_BRANCH}
+                        """
+                    }
+                    catch (exc)
+                    {
+                        echo 'Git checkout failed'
+                        throw exc
+                    }
+                }
+            }
+        }
+        stage('updating the manifest file'){
+            steps {
+                container('docker'){
+                    withCredentials([usernamePassword(credentialsId: 'opsharmabwgiturl', passwordVariable: 'PASSWORD', usernameVariable: 'USER')]) {
+                        sh '''
+                            git config user.email "opsharmabw@gmail.com"
+                            git config user.name "opsharmabw"
+                            cd java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/
+                            cat deployment.yml
+                            BUILD_NUMBER=${BUILD_TIMESTAMP}
+                            sed -i "s+docker.io/opsharmabw/springbootcicd.*+docker.io/opsharmabw/springbootcicd:${BUILD_TIMESTAMP}+g" deployment.yml
+                            cat deployment.yml
+                            git add deployment.yml
+                            git commit -m "Update deployment image to version ${BUILD_TIMESTAMP}"
+                            git push https://${PASSWORD}@github.com/${USER}/Java_CI_CD_using_jenkins_argocd.git HEAD:main
+                        '''                    
+                }
+            }
+        }
+    }
+    }
+}
