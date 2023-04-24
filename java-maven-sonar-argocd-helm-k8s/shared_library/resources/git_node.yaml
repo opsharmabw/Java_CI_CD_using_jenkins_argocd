@@ -3,10 +3,7 @@ kind: Pod
 spec:
   containers:
   - name: docker
-    image: alpine/git
-    tty: true
-    securityContext:
-      privileged: true
+    image: jenkins/jenkins:lts
     resources:
       requests:
         cpu: 500m
