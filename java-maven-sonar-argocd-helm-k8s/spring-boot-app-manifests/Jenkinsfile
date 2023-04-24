@@ -16,9 +16,9 @@ pipeline {
                 script
                 {
                     try {
-                        checkout([$class: 'GitSCM', branches: [[name: "${GIT_BRANCH}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'opsharmabwgiturl', url: 'https://github.com/opsharmabw/Java_CI_CD_using_jenkins_argocd.git']]])
+                        checkout([$class: 'GitSCM', branches: [[name: "${git_branch}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'opsharmabwgiturl', url: 'https://github.com/opsharmabw/Java_CI_CD_using_jenkins_argocd.git']]])
                         sh """#!/bin/bash
-                            git checkout ${GIT_BRANCH}
+                            git checkout ${git_branch}
                         """
                     }
                     catch (exc)
@@ -43,7 +43,7 @@ pipeline {
                             cat deployment.yml
                             git add deployment.yml
                             git commit -m "Update deployment image to version ${BUILD_TIMESTAMP}"
-                            git push https://${PASSWORD}@github.com/${USER}/Java_CI_CD_using_jenkins_argocd.git HEAD:main
+                            git push https://${PASSWORD}@github.com/${USER}/Java_CI_CD_using_jenkins_argocd.git HEAD:dev
                         '''                    
                 }
             }
