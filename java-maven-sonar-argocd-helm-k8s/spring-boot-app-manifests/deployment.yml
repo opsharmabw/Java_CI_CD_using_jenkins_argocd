@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: spring-boot-app
-        image: docker.io/opsharmabw/springbootcicd:202304240719
+        image: docker.io/opsharmabw/springbootcicd:202304240720
         ports:
         - containerPort: 8080
