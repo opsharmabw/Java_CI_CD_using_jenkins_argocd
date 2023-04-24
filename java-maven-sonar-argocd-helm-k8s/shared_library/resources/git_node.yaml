@@ -3,7 +3,7 @@ kind: Pod
 spec:
   containers:
   - name: docker
-    image: git
+    image: alpine/git
     tty: true
     securityContext:
       privileged: true
